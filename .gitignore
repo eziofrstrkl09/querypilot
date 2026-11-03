@@ -1,5 +1,5 @@
 .env
 .venv/
 __pycache__/
-querypilot_schema.py
+querypilot_schema.sql
 generate_data.py
