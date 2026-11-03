@@ -5,8 +5,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# def get_connection():
+#     conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+#     conn.set_session(readonly=True)
+#     return conn
+
 def get_connection():
-    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    conn=psycopg2.connect(
+        os.getenv("DATABASE_URL"),
+        options="-c statement_timeout=10000"
+    )
+
     conn.set_session(readonly=True)
     return conn
 
