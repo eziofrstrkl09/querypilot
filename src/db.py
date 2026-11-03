@@ -6,7 +6,9 @@ load_dotenv()
 
 
 def get_connection():
-    return psycopg2.connect(os.getenv("DATABASE_URL"))
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    conn.set_session(readonly=True)
+    return conn
 
 
 def get_schema_text(conn):
@@ -53,3 +55,21 @@ def get_schema_text(conn):
         result.append(f"{source}.{source_col} -> {target}.{target_col}")
 
     return "\n".join(result)
+
+
+def run_query(conn, sql):
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+
+            if cur.description is None:
+                return None, None, "Query did not return a result set."
+
+            columns = [description[0] for description in cur.description]
+            rows = cur.fetchall()
+
+            return columns, rows, None
+
+    except psycopg2.Error as exc:
+        conn.rollback()
+        return None, None, str(exc)
