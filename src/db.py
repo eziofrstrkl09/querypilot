@@ -1,0 +1,55 @@
+import os
+import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def get_connection():
+    return psycopg2.connect(os.getenv("DATABASE_URL"))
+
+
+def get_schema_text(conn):
+    schema = {}
+
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT table_name, column_name, data_type
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            ORDER BY table_name, ordinal_position;
+        """)
+
+        for table, column, dtype in cur.fetchall():
+            schema.setdefault(table, []).append(f"{column} ({dtype})")
+
+        cur.execute("""
+            SELECT
+                tc.table_name,
+                kcu.column_name,
+                ccu.table_name,
+                ccu.column_name
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+                ON tc.constraint_name = kcu.constraint_name
+                AND tc.table_schema = kcu.table_schema
+            JOIN information_schema.constraint_column_usage ccu
+                ON tc.constraint_name = ccu.constraint_name
+                AND tc.table_schema = ccu.table_schema
+            WHERE tc.constraint_type = 'FOREIGN KEY'
+              AND tc.table_schema = 'public';
+        """)
+
+        relationships = cur.fetchall()
+
+    result = []
+
+    for table, columns in schema.items():
+        result.append(f"Table: {table}\nColumns: {', '.join(columns)}")
+
+    result.append("\nForeign-key relationships:")
+
+    for source, source_col, target, target_col in relationships:
+        result.append(f"{source}.{source_col} -> {target}.{target_col}")
+
+    return "\n".join(result)
