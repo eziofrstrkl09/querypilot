@@ -1,23 +1,25 @@
-import os
+
 import psycopg2
 from dotenv import load_dotenv
+import os
+
 
 load_dotenv()
 
 
-# def get_connection():
-#     conn = psycopg2.connect(os.getenv("DATABASE_URL"))
-#     conn.set_session(readonly=True)
-#     return conn
-
-
-# 10 seconds query timeout
 def get_connection():
+    database_url = os.getenv("DATABASE_URL")
+
+    if not database_url:
+        raise ValueError("DATABASE_URL is missing from environment.")
+
     conn = psycopg2.connect(
-        os.getenv("DATABASE_URL"), options="-c statement_timeout=10000"
+        database_url,
+        options="-c statement_timeout=10000"
     )
 
     conn.set_session(readonly=True)
+
     return conn
 
 
@@ -76,6 +78,49 @@ def get_schema_text(conn):
     return "\n".join(result)
 
 
+def get_allowed_tables(conn):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_type = 'BASE TABLE';
+        """)
+
+        return {row[0].lower() for row in cur.fetchall()}
+
+
+def get_table_columns(conn):
+    """
+    Returns the database schema in SQLGlot-compatible format:
+    {
+        "customers": {
+            "customer_id": "UNKNOWN",
+            "first_name": "UNKNOWN"
+        }
+    }
+    """
+
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT table_name, column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            ORDER BY table_name, ordinal_position;
+        """)
+
+        rows = cur.fetchall()
+
+    schema = {}
+
+    for table_name, column_name in rows:
+        schema.setdefault(table_name.lower(), {})[
+            column_name.lower()
+        ] = "UNKNOWN"
+
+    return schema
+
+
 def run_query(conn, sql):
     try:
         with conn.cursor() as cur:
@@ -84,23 +129,11 @@ def run_query(conn, sql):
             if cur.description is None:
                 return None, None, "Query did not return a result set."
 
-            columns = [description[0] for description in cur.description]
+            columns = [desc[0] for desc in cur.description]
             rows = cur.fetchall()
 
-            return columns, rows, None
+        return columns, rows, None
 
-    except psycopg2.Error as exc:
+    except Exception as exc:
         conn.rollback()
         return None, None, str(exc)
-
-def get_allowed_tables(conn):
-    with conn.cursor() as cur:
-        cur.execute("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-              AND table_type = 'BASE TABLE'
-            ORDER BY table_name;
-        """)
-
-        return {row[0] for row in cur.fetchall()}

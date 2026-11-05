@@ -3,8 +3,10 @@ from src.db import (
     get_connection,
     get_schema_text,
     get_allowed_tables,
+    get_table_columns,
     run_query,
 )
+
 from src.llm import generate_sql
 from src.sql_safety import validate_sql
 
@@ -24,24 +26,26 @@ def main():
     try:
         schema = get_schema_text(conn)
         allowed_tables = get_allowed_tables(conn)
+        column_schema = get_table_columns(conn)
 
-        print(f"Schema retrieved (~{len(schema) // 4} tokens)")
+        print(f"Schema retrieved: {len(schema)} characters")
         print(f"Allowed tables: {len(allowed_tables)}")
+        print(f"Tables with column metadata: {len(column_schema)}")
 
         for i, question in enumerate(QUESTIONS, start=1):
+
             print("\n" + "=" * 70)
             print(f"QUESTION {i}: {question}")
 
             try:
-                # Generate SQL
                 sql = generate_sql(question, schema)
 
                 print(f"\nGenerated SQL:\n{sql}")
 
-                # Validate generated SQL
                 safe_sql, validation_error = validate_sql(
                     sql,
-                    allowed_tables
+                    allowed_tables,
+                    column_schema,
                 )
 
                 if validation_error:
@@ -50,7 +54,6 @@ def main():
 
                 print(f"\nValidated SQL:\n{safe_sql}")
 
-                # Execute ONLY the validated SQL
                 columns, rows, error = run_query(conn, safe_sql)
 
                 if error:

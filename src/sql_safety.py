@@ -1,13 +1,13 @@
 
 import sqlglot
 from sqlglot import exp
-from sqlglot.errors import SqlglotError
+from sqlglot.errors import SqlglotError, OptimizeError
 from sqlglot.optimizer.scope import traverse_scope
+from sqlglot.optimizer.qualify import qualify
 
 
 MAX_ROWS = 100
 
-# Conservative function allowlist.
 ALLOWED_FUNCTIONS = {
     "count",
     "sum",
@@ -43,29 +43,20 @@ FORBIDDEN_NODE_TYPES = {
 }
 
 
-def validate_sql(sql, allowed_tables, max_rows=MAX_ROWS):
-    """
-    Validate generated SQL before execution.
+def validate_sql(sql, allowed_tables, column_schema, max_rows=MAX_ROWS):
 
-    Returns:
-        (safe_sql, None) on success.
-        (None, error_message) on rejection.
-    """
-
-    # 1. Parse SQL using PostgreSQL dialect.
+    # 1. Parse SQL.
     try:
         statements = sqlglot.parse(sql, read="postgres")
-
     except SqlglotError as exc:
         return None, f"SQL parsing failed: {exc}"
 
-    # 2. Require exactly one non-empty statement.
     if len(statements) != 1 or statements[0] is None:
         return None, "Only one SQL statement is allowed."
 
     tree = statements[0]
 
-    # 3. Only SELECT and set-operation queries.
+    # 2. Allow only SELECT-based queries.
     allowed_roots = (
         exp.Select,
         exp.Union,
@@ -76,14 +67,13 @@ def validate_sql(sql, allowed_tables, max_rows=MAX_ROWS):
     if not isinstance(tree, allowed_roots):
         return None, "Only SELECT queries are allowed."
 
-    # 4. Reject forbidden operations anywhere in the AST.
+    # 3. Reject forbidden SQL operations.
     for node in tree.walk():
         if node.key.lower() in FORBIDDEN_NODE_TYPES:
             return None, f"Forbidden SQL operation: {node.key}"
 
-    # 5. Restrict SQL functions.
+    # 4. Function allowlist.
     for func in tree.find_all(exp.Func):
-
         if isinstance(func, exp.Anonymous):
             function_name = func.name.lower()
         else:
@@ -92,30 +82,22 @@ def validate_sql(sql, allowed_tables, max_rows=MAX_ROWS):
         if function_name not in ALLOWED_FUNCTIONS:
             return None, f"Function not allowed: {function_name}"
 
-    # 6. Normalize the table allowlist.
-    allowed_tables = {
-        name.lower() for name in allowed_tables
-    }
+    # 5. Validate table references and schemas.
+    allowed_tables = {name.lower() for name in allowed_tables}
 
-    # 7. Reject non-public schemas and cross-database references.
     for table in tree.find_all(exp.Table):
 
         if table.db and table.db.lower() != "public":
-            return None, (
-                f"Non-public schema access rejected: {table.db}"
-            )
+            return None, f"Non-public schema access rejected: {table.db}"
 
         if table.catalog:
             return None, "Cross-database access is not allowed."
 
-        # Reject table-valued functions.
         if not isinstance(table.this, exp.Identifier):
             return None, "Table-valued functions are not allowed."
 
-    # 8. Resolve physical tables using SQLGlot scopes.
-    # CTEs and derived tables resolve to Scope objects.
+    # Resolve physical tables within each SQL scope.
     for scope in traverse_scope(tree):
-
         for alias, (node, source) in scope.selected_sources.items():
 
             if isinstance(source, exp.Table):
@@ -124,7 +106,24 @@ def validate_sql(sql, allowed_tables, max_rows=MAX_ROWS):
                 if table_name not in allowed_tables:
                     return None, f"Table not allowed: {table_name}"
 
-    # 9. Enforce maximum result-row limit.
+    # 6. Validate column references.
+    try:
+        qualify(
+            tree.copy(),
+            dialect="postgres",
+            schema=column_schema,
+            validate_qualify_columns=True,
+            quote_identifiers=False,
+            identify=False,
+        )
+
+    except OptimizeError as exc:
+        return None, f"Column validation failed: {exc}"
+
+    except SqlglotError as exc:
+        return None, f"Column validation failed: {exc}"
+
+    # 7. Validate row limit.
     if max_rows <= 0:
         return None, "Maximum row limit must be positive."
 
@@ -150,5 +149,4 @@ def validate_sql(sql, allowed_tables, max_rows=MAX_ROWS):
         if requested_limit > max_rows:
             tree = tree.limit(max_rows)
 
-    # 10. Return the validated, normalized SQL.
     return tree.sql(dialect="postgres"), None
