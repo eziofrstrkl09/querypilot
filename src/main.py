@@ -2,6 +2,7 @@
 from src.db import get_connection, get_schema_text, run_query
 from src.llm import generate_sql
 
+# testing baseline accuracy
 QUESTIONS = [
     "How many customers do we have?",
     "How many orders were delivered?",
