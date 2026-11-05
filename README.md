@@ -173,7 +173,7 @@ This baseline will serve as the reference point for evaluating subsequent improv
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/eziofrstrkl09/querypilot
 cd Querypilot
 ```
 
@@ -188,8 +188,8 @@ Install dependencies using the project's dependency file.
 Configure environment variables in a `.env` file:
 
 ```env
-GEMINI_API_KEY=your_api_key
-DATABASE_URL=your_database_connection_string
+GEMINI_API_KEY=api_key
+DATABASE_URL=database_connection_string
 ```
 
 Create and populate the PostgreSQL database using the provided schema and synthetic data generator.
