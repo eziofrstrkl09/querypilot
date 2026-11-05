@@ -10,10 +10,11 @@ load_dotenv()
 #     conn.set_session(readonly=True)
 #     return conn
 
+
+# 10 seconds query timeout
 def get_connection():
-    conn=psycopg2.connect(
-        os.getenv("DATABASE_URL"),
-        options="-c statement_timeout=10000"
+    conn = psycopg2.connect(
+        os.getenv("DATABASE_URL"), options="-c statement_timeout=10000"
     )
 
     conn.set_session(readonly=True)
