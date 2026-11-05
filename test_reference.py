@@ -1,5 +1,6 @@
 from src.db import get_connection, run_query
 
+# testing baseline accuracy
 sql = """
 SELECT
     c.customer_id,
