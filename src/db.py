@@ -37,19 +37,28 @@ def get_schema_text(conn):
 
         cur.execute("""
             SELECT
-                tc.table_name,
-                kcu.column_name,
-                ccu.table_name,
-                ccu.column_name
-            FROM information_schema.table_constraints tc
-            JOIN information_schema.key_column_usage kcu
-                ON tc.constraint_name = kcu.constraint_name
-                AND tc.table_schema = kcu.table_schema
-            JOIN information_schema.constraint_column_usage ccu
-                ON tc.constraint_name = ccu.constraint_name
-                AND tc.table_schema = ccu.table_schema
-            WHERE tc.constraint_type = 'FOREIGN KEY'
-              AND tc.table_schema = 'public';
+                c.conrelid::regclass::text AS source_table,
+                src_col.attname AS source_column,
+                c.confrelid::regclass::text AS target_table,
+                target_col.attname AS target_column
+            FROM pg_constraint c
+            JOIN LATERAL
+                unnest(c.conkey) WITH ORDINALITY
+                AS src(attnum, position)
+                ON TRUE
+            JOIN LATERAL
+                unnest(c.confkey) WITH ORDINALITY
+                AS dst(attnum, position)
+                ON dst.position = src.position
+            JOIN pg_attribute src_col
+                ON src_col.attrelid = c.conrelid
+                AND src_col.attnum = src.attnum
+            JOIN pg_attribute target_col
+                ON target_col.attrelid = c.confrelid
+                AND target_col.attnum = dst.attnum
+            WHERE c.contype = 'f'
+              AND c.connamespace = 'public'::regnamespace
+            ORDER BY source_table, source_column;
         """)
 
         relationships = cur.fetchall()
@@ -83,3 +92,15 @@ def run_query(conn, sql):
     except psycopg2.Error as exc:
         conn.rollback()
         return None, None, str(exc)
+
+def get_allowed_tables(conn):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+              AND table_type = 'BASE TABLE'
+            ORDER BY table_name;
+        """)
+
+        return {row[0] for row in cur.fetchall()}

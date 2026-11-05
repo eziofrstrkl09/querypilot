@@ -1,8 +1,14 @@
 
-from src.db import get_connection, get_schema_text, run_query
+from src.db import (
+    get_connection,
+    get_schema_text,
+    get_allowed_tables,
+    run_query,
+)
 from src.llm import generate_sql
+from src.sql_safety import validate_sql
 
-# testing baseline accuracy
+
 QUESTIONS = [
     "How many customers do we have?",
     "How many orders were delivered?",
@@ -17,17 +23,35 @@ def main():
 
     try:
         schema = get_schema_text(conn)
-        print(f"Schema retrieved (~{len(schema) // 4} tokens)\n")
+        allowed_tables = get_allowed_tables(conn)
+
+        print(f"Schema retrieved (~{len(schema) // 4} tokens)")
+        print(f"Allowed tables: {len(allowed_tables)}")
 
         for i, question in enumerate(QUESTIONS, start=1):
             print("\n" + "=" * 70)
             print(f"QUESTION {i}: {question}")
 
             try:
+                # Generate SQL
                 sql = generate_sql(question, schema)
+
                 print(f"\nGenerated SQL:\n{sql}")
 
-                columns, rows, error = run_query(conn, sql)
+                # Validate generated SQL
+                safe_sql, validation_error = validate_sql(
+                    sql,
+                    allowed_tables
+                )
+
+                if validation_error:
+                    print(f"\nSQL SAFETY REJECTION: {validation_error}")
+                    continue
+
+                print(f"\nValidated SQL:\n{safe_sql}")
+
+                # Execute ONLY the validated SQL
+                columns, rows, error = run_query(conn, safe_sql)
 
                 if error:
                     print(f"\nDATABASE ERROR: {error}")
