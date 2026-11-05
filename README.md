@@ -222,7 +222,3 @@ QueryPilot is under active development.
 - No automated benchmark suite or production observability is implemented yet.
 
 These limitations are being addressed incrementally through the project roadmap.
-
-## Author
-
-Developed as an AI Engineering portfolio project to explore reliable LLM-based database interaction, SQL validation, and retrieval-augmented generation.
