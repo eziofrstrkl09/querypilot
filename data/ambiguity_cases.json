@@ -1,0 +1,420 @@
+[
+    {
+        "id": "001",
+        "question": "Who are our best customers?",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by total spend",
+            "by order count",
+            "by purchase recency"
+        ],
+        "relevant_tables": [
+            "customers",
+            "orders",
+            "order_items"
+        ]
+    },
+    {
+        "id": "002",
+        "question": "Which products are our top performers?",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by units sold",
+            "by total revenue",
+            "by number of orders containing the product"
+        ],
+        "relevant_tables": [
+            "products",
+            "product_variants",
+            "order_items",
+            "orders"
+        ]
+    },
+    {
+        "id": "003",
+        "question": "Show our most valuable customers.",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by lifetime spend",
+            "by order count",
+            "by average order value"
+        ],
+        "relevant_tables": [
+            "customers",
+            "orders",
+            "order_items",
+            "payments"
+        ]
+    },
+    {
+        "id": "004",
+        "question": "Who are our most loyal customers?",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by repeat purchase frequency",
+            "by customer tenure",
+            "by lifetime spend"
+        ],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "005",
+        "question": "Which categories show the strongest growth?",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by revenue growth",
+            "by units sold growth",
+            "by order volume growth"
+        ],
+        "relevant_tables": [
+            "categories",
+            "products",
+            "order_items",
+            "orders"
+        ]
+    },
+    {
+        "id": "006",
+        "question": "Show me our active customers.",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "customers with is_active = true",
+            "customers who ordered within a recent period"
+        ],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "007",
+        "question": "Which suppliers are performing best?",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by product sales generated",
+            "by product volume supplied",
+            "by inventory availability"
+        ],
+        "relevant_tables": [
+            "suppliers",
+            "products",
+            "product_variants",
+            "order_items",
+            "inventory_stock"
+        ]
+    },
+    {
+        "id": "008",
+        "question": "Find our top stores.",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by order count",
+            "by total sales revenue",
+            "by number of customers served"
+        ],
+        "relevant_tables": [
+            "stores",
+            "orders",
+            "order_items",
+            "customers"
+        ]
+    },
+    {
+        "id": "009",
+        "question": "Show the top 5 customers by total spend.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers",
+            "orders",
+            "payments"
+        ]
+    },
+    {
+        "id": "010",
+        "question": "List the 10 best-selling products by total quantity sold.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "products",
+            "product_variants",
+            "order_items"
+        ]
+    },
+    {
+        "id": "011",
+        "question": "Find our most valuable customers ranked by lifetime successful payment amount.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers",
+            "orders",
+            "payments"
+        ]
+    },
+    {
+        "id": "012",
+        "question": "Show the most loyal customers by number of distinct orders.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "013",
+        "question": "Show active customers who placed at least one order in the last 30 days.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "014",
+        "question": "Show the top 5 stores by number of orders handled.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "stores",
+            "orders"
+        ]
+    },
+    {
+        "id": "015",
+        "question": "Show the top 10 categories by units sold.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "categories",
+            "products",
+            "order_items"
+        ]
+    },
+    {
+        "id": "016",
+        "question": "Calculate revenue growth by category between 2024 and 2025.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "categories",
+            "products",
+            "order_items",
+            "orders"
+        ]
+    },
+    {
+        "id": "017",
+        "question": "How many orders did customer 17 place?",
+        "slice": "C",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "018",
+        "question": "How many customers are registered?",
+        "slice": "C",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers"
+        ]
+    },
+    {
+        "id": "019",
+        "question": "List all product category names.",
+        "slice": "C",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "categories"
+        ]
+    },
+    {
+        "id": "020",
+        "question": "How many orders did each physical store handle?",
+        "slice": "C",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "stores",
+            "orders"
+        ]
+    },
+    {
+        "id": "021",
+        "question": "How many products belong to each category?",
+        "slice": "C",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "categories",
+            "products"
+        ]
+    },
+    {
+        "id": "022",
+        "question": "Which customers placed at least three orders?",
+        "slice": "C",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "023",
+        "question": "What was our total revenue?",
+        "slice": "D",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "gross successfully collected payments",
+            "successfully collected payments minus refunds",
+            "item revenue excluding cancelled and pending orders"
+        ],
+        "relevant_tables": [
+            "payments",
+            "refunds",
+            "orders",
+            "order_items"
+        ]
+    },
+    {
+        "id": "024",
+        "question": "How many orders were delivered?",
+        "slice": "D",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "orders whose status is delivered",
+            "distinct orders with at least one delivered shipment"
+        ],
+        "relevant_tables": [
+            "orders",
+            "shipments"
+        ]
+    },
+    {
+        "id": "025",
+        "question": "What is our average order value?",
+        "slice": "D",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "average order total",
+            "average successfully collected payment amount per order",
+            "average net order value after refunds"
+        ],
+        "relevant_tables": [
+            "orders",
+            "order_items",
+            "payments",
+            "refunds"
+        ]
+    },
+    {
+        "id": "026",
+        "question": "What is our customer retention rate?",
+        "slice": "D",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "customers who made repeat purchases",
+            "customers who purchased in consecutive measurement periods"
+        ],
+        "relevant_tables": [
+            "customers",
+            "orders"
+        ]
+    },
+    {
+        "id": "027",
+        "question": "Who are our best customers by country?",
+        "slice": "A",
+        "difficulty": "ambiguous",
+        "is_ambiguous": true,
+        "valid_interpretations": [
+            "by total spend",
+            "by order count",
+            "by purchase recency"
+        ],
+        "relevant_tables": [
+            "customers",
+            "orders",
+            "payments"
+        ]
+    },
+    {
+        "id": "028",
+        "question": "List the top-level product categories.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "categories"
+        ]
+    },
+    {
+        "id": "029",
+        "question": "Show the top 5 products in terms of units sold.",
+        "slice": "B",
+        "difficulty": "clear",
+        "is_ambiguous": false,
+        "valid_interpretations": [],
+        "relevant_tables": [
+            "products",
+            "product_variants",
+            "order_items"
+        ]
+    }
+]
