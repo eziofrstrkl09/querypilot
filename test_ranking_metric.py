@@ -12,6 +12,21 @@ TESTS = [
     ("Top products by category", False),
     ("Show the top 5 customers", False),
     ("Which top customers placed orders last week?", False),
+    
+    # Clause-boundary traps: must not detect a ranking metric
+    ("Best customers by country who placed orders", False),
+    ("Top products by category that had sales", False),
+    ("Best customers by city, orders last month", False),
+
+    # Additional valid ranking expressions
+    ("Best customers by total spend", True),
+    ("Top customers sorted by revenue", True),
+
+    # KNOWN LIMIT: unsupported metric vocabulary
+    ("Top 5 customers by lifetime value", False),
+    ("Best customers by average order value", False),
+    ("Top products by amount sold", False),
+    ("Top customers by region and revenue", False),
 ]
 
 
