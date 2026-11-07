@@ -10,6 +10,13 @@ TESTS = [
     ("Show revenue growth by category.", ["growth"]),
     ("List the top-level product categories.", []),
     ("Find our best and most valuable customers.", ["best", "most valuable"]),
+    ("List the top level categories", []),
+    ("Who are our most-valuable customers?", ["most valuable"]),
+    ("highest loyalty", ["loyalty"]),
+    ("Who is our most\nvaluable customer?", ["most valuable"]),
+    ("Show Top5 customers.", []),
+    ("Find our bestselling products.", []),
+    ("List the top   level categories", []),
 ]
 
 
