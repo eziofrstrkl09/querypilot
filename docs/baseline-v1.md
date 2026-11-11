@@ -94,3 +94,9 @@ The query returned NULL because `completed` is not a valid payment status.
 - Separate infrastructure failures from generation, validation, execution, and semantic failures.
 - Compare generated results against explicit reference definitions.
 - Do not claim stability from insufficient successful samples.
+
+## Phase 4
+
+baseline-v1 points to the original Phase 2 implementation without SQL validation. The later stability runs were performed using the Phase 3 safety wrapper, which additionally applies SQL validation and a row limit.
+
+ambiguity.py and tets_ambiguity_terms.py are used for deterministic ambiguity watchlist matching. 
