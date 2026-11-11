@@ -1,4 +1,3 @@
-
 from src.db import (
     get_connection,
     get_schema_text,
@@ -6,9 +5,9 @@ from src.db import (
     get_table_columns,
     run_query,
 )
-
 from src.llm import generate_sql
 from src.sql_safety import validate_sql
+from src.ambiguity import detect
 
 
 QUESTIONS = [
@@ -17,6 +16,7 @@ QUESTIONS = [
     "What are the names of all product categories?",
     "How many orders did each store handle?",
     "What was our total revenue?",
+    "Who are our best customers?",
 ]
 
 
@@ -33,15 +33,23 @@ def main():
         print(f"Tables with column metadata: {len(column_schema)}")
 
         for i, question in enumerate(QUESTIONS, start=1):
-
             print("\n" + "=" * 70)
             print(f"QUESTION {i}: {question}")
 
             try:
-                sql = generate_sql(question, schema)
+                # Stage A: ambiguity detection
+                ambiguity = detect(question)
 
+                if ambiguity["status"] == "ambiguous":
+                    print("\nCLARIFICATION REQUIRED")
+                    print(ambiguity["clarification"])
+                    continue
+
+                # Generate SQL only for clear questions
+                sql = generate_sql(question, schema)
                 print(f"\nGenerated SQL:\n{sql}")
 
+                # Validate SQL before execution
                 safe_sql, validation_error = validate_sql(
                     sql,
                     allowed_tables,
